@@ -870,8 +870,7 @@ if tab_cum is not None:
                 "requisito": st.column_config.TextColumn("Qué exige", disabled=True,
                                                          width="large"),
                 "plazo": st.column_config.TextColumn("Plazo / frecuencia", disabled=True),
-                "vence": st.column_config.DateColumn("Vence (estimado)", disabled=True,
-                                                     format="DD/MM/YYYY"),
+                "vence": st.column_config.TextColumn("Vence (estimado)", disabled=True),
                 "estado": st.column_config.SelectboxColumn("Estado", options=ESTADOS_OBLIGACION,
                                                            required=True),
                 "responsable": st.column_config.TextColumn("Responsable"),
@@ -880,7 +879,8 @@ if tab_cum is not None:
             }
             visibles = [c for c in columnas_obl if c in tabla_obl.columns]
             editada = st.data_editor(
-                tabla_obl.assign(vence=vence)[visibles], hide_index=True, width="stretch",
+                tabla_obl.assign(vence=[f"{v:%d/%m/%Y}" if pd.notna(v) else "—" for v in vence])[
+                    visibles], hide_index=True, width="stretch",
                 column_config=columnas_obl, key="obl_editor")
             for col in ("estado", "responsable", "evidencia"):
                 st.session_state.obl_editadas[col] = editada[col].values
