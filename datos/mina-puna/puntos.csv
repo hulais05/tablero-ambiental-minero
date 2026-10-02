@@ -1,0 +1,27 @@
+id,nombre,matriz,uso,lat,lon,coordenadas_fuente,altitud_m,nota
+AS1,Quebrada Barranquillas · AS1,agua_superficial,vida_acuatica,-25.287617,-66.675453,"25º17’15,42” S / 66º40’31,63” O",4020.0,
+AS2,Quebrada Barranquillas · AS2,agua_superficial,vida_acuatica,-25.290433,-66.673978,"25º17’25,56” S / 66º40’26,32” O",3990.0,
+AS4,Vega La Redonda · AS4,agua_superficial,vida_acuatica,-25.341092,-66.840056,"25º20’27,93” S / 66º50’24,20” O",3976.0,
+AS5,Vega La Redonda · AS5,agua_superficial,vida_acuatica,-25.335761,-66.838847,"25°20'8,74"" S / 66°50'19,85"" O",3975.0,
+AS6,Laguna temporal cercana al campamento · AS6,agua_superficial,vida_acuatica,-25.293886,-66.816778,"25º17’37,99” S / 66º49’0,40” O",4130.0,
+BQ,Río Barranquillas · BQ,agua_superficial,vida_acuatica,-25.288136,-66.675667,"25°17'17.29""S / 66°40'32.40""O",4074.0,Punto del programa de control ambiental; según la fuente unifica AS1 y AS2.
+CR,Ciénaga La Redonda (vega) · CR,agua_superficial,vida_acuatica,-25.346786,-66.8415,"25°20'48.43""S / 66°50'29.40""O",4020.0,Punto del programa de control ambiental; según la fuente unifica AS4 y AS5.
+PZ-7,Pozo de abastecimiento N.º 7,agua_subterranea,bebida_ganado,-25.295144,-66.684478,"25°17'42.52"" S / 66°41'4.12"" O",,Único pozo con permiso de agua; punto de monitoreo de agua subterránea del PGA.
+PZ-1,Agua subterránea · pozo exploratorio N.º 1,agua_subterranea,bebida_ganado,-25.283056,-66.768333,25º 16’ 59” Latitud Sur / 66º 46’ 06” Longitud Oeste,,Pozo exploratorio de 2007.
+PZ-2,Agua subterránea · pozo exploratorio N.º 2,agua_subterranea,bebida_ganado,-25.282694,-66.809639,"25º 16’ 57,7” Latitud Sur / 66º 48’ 34,7” Longitud Oeste",,Pozo exploratorio de 2007.
+PZ-3,Agua subterránea · pozo exploratorio N.º 3,agua_subterranea,bebida_ganado,-25.31025,-66.821139,"25º 18’ 36,9” Latitud Sur / 66º 49’ 16,1” Longitud Oeste",,Pozo exploratorio de 2007; colapsado según la respuesta de 2025.
+PZ-4,Agua subterránea · pozo exploratorio N.º 4,agua_subterranea,bebida_ganado,-25.297278,-66.684972,"25º17’50,2” Latitud Sur / 66º41’05,9” Longitud Oeste",,Pozo exploratorio de 2007.
+PZ-5,Agua subterránea · pozo exploratorio N.º 5,agua_subterranea,bebida_ganado,-25.285944,-66.726472,"25º17’09,4” Latitud Sur / 66º43’35,3” Longitud Oeste",,Pozo exploratorio de 2007.
+CA1,Aire · área de perforación del rajo secundario (2022),aire,aire_ambiente,-25.299,-66.816047,"25°17'56.40""S / 66°48'57.77""O",,
+CA2,"Aire · área de perforación del rajo principal, sector norte (2022)",aire,aire_ambiente,-25.298778,-66.809722,"25°17'55.60""S / 66°48'35.00""O",,
+CA3,Aire · campamento (2022),aire,aire_ambiente,-25.287694,-66.817583,"25°17'15.70""S / 66°49'03.30""O",,
+CA-MP,"Aire · campamento, monitoreo participativo (2024)",aire,aire_ambiente,-25.287381,-66.814806,"25°17'12.00""S / 66°18'55.30""O",,"Coordenadas de la respuesta de 2025 (p. 27): el informe de 2024 imprime una longitud 66°18' que cae 50 km al este de toda la red, y la respuesta escribe «6°48'». Se usa 66°48'53,30""."
+CA4,Aire · Ciénaga La Redonda (punto del PGA),aire,aire_ambiente,-25.332097,-66.8395,"25°19'55,55"" / 66°50'22,20""",,Punto propuesto en el PGA; sin mediciones en la línea de base.
+R1,Ruido · R1 (2022),ruido,ruido_industrial,-25.291481,-66.811833,"25°17'29.33""S / 66°48'42.6""O",,
+R2,Ruido · camino al rajo (2022),ruido,ruido_industrial,-25.301286,-66.814756,"25°18'4.63""S / 66°48'53.12""O",,
+R3,Ruido · R3 (2022),ruido,ruido_industrial,-25.289631,-66.817189,"25°17'22.67""S / 66°49'1.88""O",,
+R4,"Ruido · rajo, zona de perforaciones (2022)",ruido,ruido_industrial,-25.304119,-66.815386,"25°18'14.83""S / 66°48'55.39""O",,
+R5,Ruido · Ciénaga La Redonda (punto del PGA),ruido,,-25.332097,-66.8395,"25°19'55,55"" / 66°50'22,20""",,"Punto propuesto en el PGA, junto a la comunidad; sin mediciones en la línea de base."
+S1,Suelo · S1 (2022),suelo,industrial,-25.296186,-66.816769,"25°17'46,27"" S / 66°49'0,37"" O",4146.0,
+S2,Suelo · S2 (2022),suelo,industrial,-25.2877,-66.8195,"25º17'15,72"" S / 66º49'10,2"" O",4120.0,Impreso «S2o» en la tabla de coordenadas.
+S3,Suelo · S3 (2022),suelo,industrial,-25.287508,-66.822125,"25°17'15,03"" S / 66°49'19,65"" O",4059.0,

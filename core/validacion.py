@@ -58,7 +58,7 @@ ESTADOS = {
 }
 PRIORIDAD = list(ESTADOS)
 
-N_MIN_BASE = 3          # con menos campañas, el rango de la línea de base no dice nada
+N_MIN_BASE = 3          # con menos campañas, el rango no alcanza para marcar desvíos
 UMBRAL_ATENCION = 0.8   # al 80 % del nivel guía empieza la atención
 FACTOR_ESCALA = 50      # más de 50 veces el máximo histórico: casi seguro un error de carga
 
@@ -122,9 +122,15 @@ def evaluar_uno(valor, calificador, parametro, uso, base=None, dureza=None):
     """
     nombre = nombre_parametro(parametro)
     guia = nivel_guia(parametro, uso, dureza) if uso else None
-    r = rango(base, parametro) if base is not None and base["n"] >= N_MIN_BASE else None
+    # Con pocas campañas el rango de la línea de base sirve para una sola
+    # pregunta: si una superación del nivel guía ya existía antes del proyecto.
+    # Para marcar que un valor "se salió" de lo habitual hacen falta al menos
+    # N_MIN_BASE campañas; con menos, cualquier variación natural sería alarma.
+    r = rango(base, parametro) if base is not None and base["n"] >= 1 else None
+    base_firme = r is not None and base["n"] >= N_MIN_BASE
     salida = {"estado": None, "motivo": "", "nivel_guia": None, "norma": "",
-              "base_min": r[0] if r else None, "base_max": r[1] if r else None,
+              "base_min": r[0] if base_firme else None,
+              "base_max": r[1] if base_firme else None,
               "sugerencia": None, "valor_sugerido": None}
 
     if guia and guia.get("sin_tramo"):
@@ -192,7 +198,7 @@ def evaluar_uno(valor, calificador, parametro, uso, base=None, dureza=None):
 
     gmax = guia.get("max") if guia else None
     gmin = guia.get("min") if guia else None
-    dentro_base = r is not None and r[0] <= valor <= r[1]
+    dentro_base = base_firme and r[0] <= valor <= r[1]
     if gmax is not None or gmin is not None:
         alto = gmax is not None and valor > gmax
         bajo = gmin is not None and valor < gmin
@@ -200,29 +206,47 @@ def evaluar_uno(valor, calificador, parametro, uso, base=None, dureza=None):
             limite = gmax if alto else gmin
             base_tambien = base is not None and (
                 (alto and base["maximo"] > gmax) or (bajo and base["minimo"] < gmin))
-            if dentro_base and base_tambien:
+            # Fondo natural: la línea de base ya superaba el nivel guía y el
+            # valor no está peor que entonces, del lado en que lo supera. Un
+            # arsénico más bajo que el de la línea de base no es un impacto.
+            no_peor = r is not None and ((alto and valor <= r[1]) or (bajo and valor >= r[0]))
+            if base_tambien and no_peor:
+                corta = "" if base_firme else (
+                    f" La línea de base tiene {int(base['n'])} campaña"
+                    f"{'s' if base['n'] != 1 else ''}: conviene confirmarlo con más datos.")
+                verbo = "Supera el" if alto else "Está por debajo del"
                 return fin(FONDO_NATURAL,
-                           f"Supera el nivel guía ({_fmt(limite)}), pero está dentro del rango "
-                           f"natural registrado antes del proyecto ({_fmt(r[0])}–{_fmt(r[1])}).")
+                           f"{verbo} nivel guía ({_fmt(limite)}), pero no está peor que antes "
+                           f"del proyecto: la línea de base ya registraba "
+                           f"{_fmt(base['maximo'] if alto else base['minimo'])} "
+                           f"(con su tolerancia, {_fmt(r[1] if alto else r[0])}).{corta}")
             return fin(SUPERA, f"{'Supera' if alto else 'Por debajo de'} el nivel guía para "
                                f"{USOS.get(guia['uso'], guia['uso']).lower()}: "
                                f"{_fmt(valor)} frente a {_fmt(limite)}.")
         # El 80 % solo tiene sentido en niveles de un solo lado, que parten de
-        # cero. En un rango como el del pH (6,5 a 8,5), un 8,1 es el 95 % del
-        # máximo y está perfectamente normal.
-        if gmax is not None and gmin is None and valor >= UMBRAL_ATENCION * gmax:
+        # cero, y en escalas lineales. En un rango como el del pH (6,5 a 8,5),
+        # un 8,1 es el 95 % del máximo y está perfectamente normal; y 56 dBA no
+        # es "el 80 %" de 70 dBA en ningún sentido acústico.
+        lineal = tolerancia(parametro)[0] == "rel"
+        if gmax is not None and gmin is None and lineal and valor >= UMBRAL_ATENCION * gmax:
             return fin(ATENCION, f"Al {valor / gmax:.0%} del nivel guía ({_fmt(gmax)}).")
-        if r is not None and not dentro_base:
+        if base_firme and not dentro_base:
             return fin(ATENCION, f"Cumple el nivel guía, pero está fuera del rango de la línea "
                                  f"de base ({_fmt(r[0])}–{_fmt(r[1])}).")
         return fin(CUMPLE, "Dentro del nivel guía" +
-                   (" y del rango de la línea de base." if r is not None else "."))
+                   (" y del rango de la línea de base." if base_firme else "."))
 
-    if r is not None:
+    if base_firme:
         if dentro_base:
             return fin(CUMPLE, "Sin nivel guía: dentro del rango de la línea de base.")
         return fin(ATENCION, f"Sin nivel guía: fuera del rango de la línea de base "
                              f"({_fmt(r[0])}–{_fmt(r[1])}).")
+    if r is not None:
+        n = int(base["n"])
+        return fin(SIN_REFERENCIA, f"Sin nivel guía, y la línea de base tiene {n} campaña"
+                                   f"{'s' if n != 1 else ''} ({_fmt(base['minimo'])}–"
+                                   f"{_fmt(base['maximo'])}): hacen falta al menos "
+                                   f"{N_MIN_BASE} para marcar desvíos.")
     return fin(SIN_REFERENCIA, "Sin nivel guía ni línea de base con qué comparar.")
 
 

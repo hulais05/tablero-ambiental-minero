@@ -1,0 +1,14 @@
+id,fecha,tipo,laboratorio,acreditacion,consultora,descripcion,fuente
+PUNA-2007-07,2007-07-03,Línea de base,Laboratorio universitario (2007),s/d,s/d,"Muestras de agua de los pozos exploratorios (estudio de fuentes de agua, 2007).",estudio hidrogeológico 2021
+PUNA-2007-10,2007-10-25,Línea de base,Laboratorio universitario (2007),s/d,s/d,"Muestras de agua de los pozos exploratorios (estudio de fuentes de agua, 2007).","informe técnico del pozo N.º 2 (consultora hidrogeológica, jun-2007); informe técnico del pozo N.º 3 (consultora hidrogeológica, nov-2007)"
+PUNA-2007-11,2007-11-18,Línea de base,Laboratorio universitario (2007),s/d,s/d,"Muestras de agua de los pozos exploratorios (estudio de fuentes de agua, 2007).","IIA (Salta, ago-2024), cap. 2a; estudio hidrogeológico 2021"
+PUNA-2022-09,2022-09-28,Línea de base,Laboratorio externo C,s/d,Consultora del IIA,"Campaña de línea de base del Informe de Impacto Ambiental: agua superficial, aire, ruido y suelo.","IIA (Salta), anexo 2b (protocolo Q 356053); IIA (Salta), anexo 2c (protocolo Q 356054); IIA (Salta), cap. 2a; IIA (Salta, ago-2024), cap. 2a"
+PUNA-2024-02,2024-02-22,Línea de base,Laboratorio externo B,s/d,s/d,Monitoreo participativo: aire en el campamento y agua del pozo de abastecimiento.,"IIA (Salta), anexo 3; IIA (Salta, ago-2024), cap. 2a"
+PUNA-2024-03,2024-03-15,Línea de base,Laboratorio externo A (acreditado),s/d,s/d,"Monitoreo mensual del pozo de abastecimiento, reproducido en el IIA.","IIA (Salta, ago-2024), cap. 2a"
+PUNA-2024-04,2024-04-15,Línea de base,Laboratorio externo A (acreditado),s/d,s/d,"Monitoreo mensual del pozo de abastecimiento, reproducido en el IIA.","IIA (Salta, ago-2024), cap. 2a"
+PUNA-2024-05,2024-05-15,Línea de base,Laboratorio externo A (acreditado),s/d,s/d,"Monitoreo mensual del pozo de abastecimiento, reproducido en el IIA.","IIA (Salta, ago-2024), cap. 2a"
+PUNA-2024-06,2024-06-15,Línea de base,Laboratorio externo A (acreditado),s/d,s/d,"Monitoreo mensual del pozo de abastecimiento, reproducido en el IIA.","IIA (Salta, ago-2024), cap. 2a"
+PUNA-2025-01,2025-01-16,Línea de base,Laboratorio externo A (acreditado),s/d,s/d,Programa de control ambiental: monitoreo mensual de agua superficial.,informe de laboratorio MA25-00070
+PUNA-2025-02,2025-02-12,Línea de base,Laboratorio externo A (acreditado),s/d,s/d,Programa de control ambiental: monitoreo mensual de agua superficial.,informe de laboratorio MA25-00260
+PUNA-2025-03,2025-03-21,Línea de base,Laboratorio externo A (acreditado),s/d,s/d,Programa de control ambiental: monitoreo mensual de agua superficial.,informe de laboratorio MA25-00437
+PUNA-2025-04,2025-04-10,Línea de base,Laboratorio externo A (acreditado),s/d,s/d,Programa de control ambiental: monitoreo mensual de agua superficial.,informe de laboratorio MA25-00526 (Revisión 1); informe de laboratorio MA25-00580

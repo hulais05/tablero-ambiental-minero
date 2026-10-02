@@ -29,6 +29,27 @@ def test_supera_fuera_del_fondo_natural():
     assert r["estado"] == SUPERA
 
 
+def test_por_debajo_de_la_linea_de_base_no_es_impacto():
+    # Sigue sobre el nivel guía, pero más bajo que antes del proyecto.
+    r = evaluar_uno(0.06, "", "arsenico", "vida_acuatica", base(0.10, 0.14))
+    assert r["estado"] == FONDO_NATURAL
+
+
+def test_linea_de_base_corta_explica_una_superacion_previa():
+    # Con dos campañas alcanza para saber que la superación ya existía.
+    r = evaluar_uno(0.44, "", "arsenico", "fuente_bebida", base(0.30, 0.58, n=2))
+    assert r["estado"] == FONDO_NATURAL and "2 campañas" in r["motivo"]
+    assert r["base_min"] is None                      # pero no hay rango firme que mostrar
+    assert evaluar_uno(0.90, "", "arsenico", "fuente_bebida",
+                       base(0.30, 0.58, n=2))["estado"] == SUPERA
+
+
+def test_linea_de_base_corta_no_marca_desvios():
+    # Con una sola campaña no hay rango para decir que un valor se salió.
+    r = evaluar_uno(0.030, "", "arsenico", "fuente_bebida", base(0.010, 0.010, n=1))
+    assert r["estado"] == CUMPLE
+
+
 def test_no_detectado_con_limite_mayor_al_nivel_guia():
     r = evaluar_uno(0.005, "<", "cromo", "vida_acuatica")
     assert r["estado"] == NO_CONCLUYENTE
@@ -114,5 +135,7 @@ def test_escenario_cuenta_su_historia(evaluado):
     assert estados("SA-AS-02", "arsenico") == {FONDO_NATURAL}   # arsénico natural
     assert estados("SB-AS-02", "cromo") == {NO_CONCLUYENTE}     # el LD del laboratorio
     assert ATENCION in estados("SA-SB-02", "nivel_freatico")     # descenso del nivel
-    # Ninguna superación queda sin explicar en una campaña aprobada.
-    assert set(ev[ev["estado"] == SUPERA]["punto_id"]) == {"CC-AS-02"}
+    # El zinc aguas abajo del dique y los eventos de viento del PM10 son las
+    # únicas superaciones, y ninguna queda sin explicar en una campaña aprobada.
+    superan = ev[ev["estado"] == SUPERA]
+    assert set(superan["punto_id"]) == {"CC-AS-02", "SB-AI-01"}

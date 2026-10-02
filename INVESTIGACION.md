@@ -269,7 +269,8 @@ con el Boletín Oficial.
 | Cromo total | Vida acuática | 0,002 mg/L | Dec. 831/93 T.2 | confirmado |
 | Litio | Irrigación | 2,5 mg/L | Dec. 831/93 T.5 | confirmado |
 | Arsénico | Suelo agrícola / residencial / industrial | 20 / 30 / 50 mg/kg | Dec. 831/93 T.9 | confirmado |
-| PM10 | Aire | **no se encontró una cifra argentina confirmada** | — | se compara solo con la línea de base |
+| PM10 | Aire | 150 µg/m³ (24 h, fracción respirable) | Ley 24.585 T.8, según la aplica un IIA aprobado de la Puna (2024) | según IIA |
+| PM2,5 | Aire | **sin nivel guía en la Ley 24.585** | — | se compara solo con la línea de base |
 
 ### Tres hallazgos que cambian el diseño
 

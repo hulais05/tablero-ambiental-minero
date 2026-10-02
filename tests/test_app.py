@@ -12,13 +12,19 @@ def boton(at, inicio):
     return next(b for b in at.button if b.label.startswith(inicio))
 
 
-def test_arranca_sin_errores():
+@pytest.fixture
+def sintetico(monkeypatch):
+    """Las pruebas del recorrido usan el escenario sintético, que no cambia."""
+    monkeypatch.setenv("TABLERO_DATOS", "sintetico")
+
+
+def test_arranca_sin_errores(sintetico):
     at = AppTest.from_file(APP, default_timeout=90).run()
     assert not at.exception
     assert [t.label for t in at.tabs][0] == "🌎 Ciudadanía"
 
 
-def test_recorrido_completo():
+def test_recorrido_completo(sintetico):
     at = AppTest.from_file(APP, default_timeout=90).run()
     boton(at, "Usar la planilla de ejemplo").click().run()
     presentar = boton(at, "Presentar la campaña")
@@ -38,7 +44,7 @@ def test_recorrido_completo():
     assert [h["rol"] for h in campania["historial"]] == ["empresa", "autoridad"]
 
 
-def test_observar_y_volver_a_presentar():
+def test_observar_y_volver_a_presentar(sintetico):
     at = AppTest.from_file(APP, default_timeout=90).run()
     revision = next(s for s in at.selectbox if s.label == "Campaña")
     revision.select("SALAR-B-2026-09").run()
@@ -52,7 +58,7 @@ def test_observar_y_volver_a_presentar():
     assert at.session_state.campanias["SALAR-B-2026-09"]["estado"] == "PRESENTADA"
 
 
-def test_conectores_y_filtros():
+def test_conectores_y_filtros(sintetico):
     at = AppTest.from_file(APP, default_timeout=90).run()
     perfil = next(s for s in at.selectbox if s.label == "Jurisdicción")
     perfil.select("salta").run()
@@ -65,3 +71,34 @@ def test_conectores_y_filtros():
     parametro = next(s for s in at.selectbox if s.label == "Parámetro")
     parametro.select("zinc").run()
     assert not at.exception
+
+
+# ------------------------------------------------------- con datos reales ---
+
+@pytest.fixture
+def real(monkeypatch):
+    monkeypatch.setenv("TABLERO_DATOS", "mina-puna")
+
+
+def test_datos_reales_arrancan_con_cumplimiento(real):
+    at = AppTest.from_file(APP, default_timeout=90).run()
+    assert not at.exception
+    pestanas = [t.label for t in at.tabs]
+    assert pestanas[0] == "🌎 Ciudadanía" and "📋 Cumplimiento" in pestanas
+    assert at.session_state.esc["meta"]["real"]
+
+
+def test_datos_reales_recorrido_completo(real):
+    at = AppTest.from_file(APP, default_timeout=90).run()
+    boton(at, "Usar la planilla de abril de 2025").click().run()
+    assert boton(at, "Presentar la campaña").disabled
+    boton(at, "Corregir a").click().run()           # arsénico en µg/L → mg/L
+    boton(at, "Descartar fila").click().run()       # pH 81, falta la coma
+    boton(at, "Descartar fila").click().run()       # el punto C-R no existe
+    boton(at, "Presentar la campaña").click().run()
+    assert not at.exception
+    assert at.session_state.campanias["PUNA-2025-04"]["estado"] == "PRESENTADA"
+    revision = next(s for s in at.selectbox if s.label == "Campaña")
+    revision.select("PUNA-2025-04").run()
+    boton(at, "Aprobar y publicar").click().run()
+    assert at.session_state.campanias["PUNA-2025-04"]["estado"] == "APROBADA"

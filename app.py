@@ -24,8 +24,9 @@ import streamlit as st
 from core.catalogo import MATRICES, PARAMETROS, USOS, nombre_parametro
 from core.conectores import (EXPORTADORES, Envio, cargar_perfiles, contenido, enviar,
                              nombre_archivo, solicitud_api)
-from core.datos import (PROYECTOS, TIPO_BASE, generar_escenario, interpretar,
-                        leer_archivo, libro_laboratorio_ejemplo, nueva_campania)
+from core.datos import (TIPO_BASE, interpretar, leer_archivo, libro_laboratorio,
+                        nueva_campania)
+from core.escenario import cargar as cargar_escenario
 from core.flujo import (APROBADA, OBSERVADA, PRESENTADA, faltantes_para_presentar,
                         publicadas, transicionar)
 from core.flujo import ESTADOS as ESTADOS_CAMPANIA
@@ -147,6 +148,16 @@ def gravedad(estado):
     return PRIORIDAD.index(estado) if estado in PRIORIDAD else len(PRIORIDAD)
 
 
+def zoom_para(lats, lons, alto_px=420, ancho_px=900):
+    """Zoom que encuadra todos los puntos con un margen, sin depender del mapa base."""
+    import math
+    alto = max(max(lats) - min(lats), 0.005) * 1.6
+    ancho = max(max(lons) - min(lons), 0.005) * 1.6
+    z_ancho = math.log2(360 * ancho_px / 256 / ancho)
+    z_alto = math.log2(180 * alto_px / 256 / alto)
+    return max(4.0, min(13.0, min(z_ancho, z_alto)))
+
+
 def _rgb(hex_color):
     return [int(hex_color[i:i + 2], 16) for i in (1, 3, 5)]
 
@@ -165,7 +176,7 @@ def asegurar_opcion(clave, opciones, defecto=None):
 
 def iniciar(forzar=False):
     if forzar or "esc" not in st.session_state:
-        esc = generar_escenario()
+        esc = cargar_escenario()
         st.session_state.esc = esc
         st.session_state.campanias = copy.deepcopy(esc["campanias"])
         st.session_state.resultados = esc["resultados"].copy()
@@ -175,7 +186,7 @@ def iniciar(forzar=False):
         # La planilla de ejemplo se arma una sola vez: el XLSX lleva la hora de
         # creación adentro, y regenerarla en cada recarga la volvería "otro
         # archivo" y borraría las correcciones ya hechas.
-        st.session_state.ejemplo = libro_laboratorio_ejemplo(esc)
+        st.session_state.ejemplo = libro_laboratorio(esc)
         st.session_state.aviso = None
         st.session_state.pop("eval", None)
 
@@ -195,6 +206,8 @@ def evaluacion():
 iniciar()
 esc = st.session_state.esc
 puntos = esc["puntos"]
+META = esc["meta"]
+PROYECTOS = esc["proyectos"].to_dict("records")
 proyectos = {p["id"]: p for p in PROYECTOS}
 nombre_punto = dict(zip(puntos["id"], puntos["nombre"]))
 perfiles = cargar_perfiles()
@@ -303,25 +316,21 @@ with st.sidebar:
     st.divider()
     st.markdown("**Quién firma cada paso**")
     firma_empresa = st.text_input("Responsable ambiental de la empresa",
-                                  value="Responsable ambiental · Empresa A S.A.")
-    firma_autoridad = st.text_input("Revisor de la autoridad",
-                                    value="Revisor · Área de Control Ambiental")
+                                  value=META["firma_empresa"])
+    firma_autoridad = st.text_input("Revisor de la autoridad", value=META["firma_autoridad"])
     st.caption("Cada cambio de estado queda en el historial con este nombre, la fecha y la "
                "hora. Sin una persona detrás, «la autoridad controla» es una frase.")
     st.divider()
     if st.button("Reiniciar la demostración", width="stretch"):
         iniciar(forzar=True)
         st.rerun()
-    st.caption("⚠️ Datos sintéticos. Proyectos, empresas, comunidades, laboratorios y "
-               "valores son ficticios; las coordenadas no corresponden a ningún proyecto real.")
+    st.caption(META["aviso_datos"])
 
 # ------------------------------------------------------------------ header ---
 st.markdown(
     '<div class="brand">Tablero <span>Ambiental</span> Minero</div>'
     f'<div class="lema">{LEMA}</div>'
-    '<div class="sub">El circuito del MAIM de Jujuy —la empresa carga, la autoridad controla, '
-    'la ciudadanía consulta—, del lado de la empresa y con salida a cada canal oficial.</div>',
-    unsafe_allow_html=True)
+    f'<div class="sub">{META["subtitulo"]}</div>', unsafe_allow_html=True)
 
 if st.session_state.aviso:
     st.success(st.session_state.aviso)
@@ -329,8 +338,16 @@ if st.session_state.aviso:
 
 base, ev = evaluacion()
 
-tab_pub, tab_emp, tab_aut, tab_con, tab_info = st.tabs(
-    ["🌎 Ciudadanía", "🏭 Empresa", "🏛️ Autoridad", "🔌 Conectores", "📚 Cómo funciona"])
+# La pestaña de cumplimiento aparece cuando el escenario trae las obligaciones
+# del proyecto (DIA, PGA). El escenario sintético no las tiene.
+HAY_CUMPLIMIENTO = not esc["obligaciones"].empty or not esc["programa"].empty
+_pestanas = ["🌎 Ciudadanía", "🏭 Empresa"] + (["📋 Cumplimiento"] if HAY_CUMPLIMIENTO else []) \
+    + ["🏛️ Autoridad", "🔌 Conectores", "📚 Cómo funciona"]
+_tabs = dict(zip(_pestanas, st.tabs(_pestanas)))
+tab_pub, tab_emp = _tabs["🌎 Ciudadanía"], _tabs["🏭 Empresa"]
+tab_cum = _tabs.get("📋 Cumplimiento")
+tab_aut, tab_con, tab_info = (_tabs["🏛️ Autoridad"], _tabs["🔌 Conectores"],
+                              _tabs["📚 Cómo funciona"])
 
 # =========================================================================
 # Ciudadanía: lo que se publica, y nada más que eso.
@@ -366,10 +383,12 @@ with tab_pub:
     if vista.empty:
         st.info("No hay resultados publicados para esa combinación de filtros.")
     else:
-        # Estado de cada punto: el peor resultado de la última campaña publicada
-        # de su proyecto. Es la foto de hoy; la historia está en la serie.
-        ultima = vista.groupby("proyecto_id")["fecha"].max()
-        recientes = vista[vista["fecha"] == vista["proyecto_id"].map(ultima)]
+        # Estado de cada punto: el peor resultado de su último muestreo
+        # publicado. Es la foto de hoy; la historia está en la serie. Se toma
+        # por punto y no por proyecto: en los datos reales cada campaña cubre
+        # solo una parte de la red.
+        ultima = vista.groupby("punto_id")["fecha"].transform("max")
+        recientes = vista[vista["fecha"] == ultima]
         estado_punto = recientes.groupby("punto_id")["estado"].agg(peor_estado)
         cuentas = estado_punto.value_counts().to_dict()
 
@@ -399,10 +418,39 @@ with tab_pub:
             # "pixels" a secas termina en círculos de kilómetros.
             radius_units="'pixels'", get_line_color=[255, 255, 255],
             line_width_min_pixels=2)
-        vista_mapa = pdk.ViewState(latitude=float(pts["lat"].mean()),
-                                   longitude=float(pts["lon"].mean()),
-                                   zoom=9.2 if pts["proyecto_id"].nunique() == 1 else 6.6)
-        mapa = pdk.Deck(layers=[capa], initial_view_state=vista_mapa, map_style=None,
+        capas_mapa = []
+        contornos = esc.get("contornos")
+        if contornos is not None and not contornos.empty:
+            capas_mapa.append(pdk.Layer(
+                "PolygonLayer", data=contornos, id="contornos", pickable=False,
+                get_polygon="camino", get_fill_color=[21, 94, 117, 18],
+                get_line_color=[21, 94, 117, 140], line_width_min_pixels=1, stroked=True,
+                filled=True))
+        comp = esc.get("componentes")
+        if comp is not None and not comp.empty:
+            # Las instalaciones del proyecto dan contexto: sin ellas, un punto de
+            # agua es un círculo en el vacío.
+            capas_mapa.append(pdk.Layer(
+                "ScatterplotLayer", data=comp, id="componentes", pickable=False,
+                get_position="[lon, lat]", get_fill_color=[100, 116, 139, 150], get_radius=4,
+                radius_units="'pixels'"))
+            rotulos = pdk.Layer(
+                "TextLayer", data=comp, id="rotulos", pickable=False,
+                get_position="[lon, lat]", get_text="nombre", get_size=12,
+                get_color=[51, 65, 85], get_pixel_offset=[0, -11],
+                character_set="'auto'", font_family="'Arial'", font_weight=600,
+                outline_width=2, outline_color=[255, 255, 255], font_settings={"sdf": True})
+        capas_mapa.append(capa)
+        if comp is not None and not comp.empty:
+            capas_mapa.append(rotulos)             # los rótulos, arriba de todo
+        todas_lat = list(pts["lat"]) + (list(comp["lat"]) if comp is not None and
+                                        not comp.empty else [])
+        todas_lon = list(pts["lon"]) + (list(comp["lon"]) if comp is not None and
+                                        not comp.empty else [])
+        vista_mapa = pdk.ViewState(latitude=(min(todas_lat) + max(todas_lat)) / 2,
+                                   longitude=(min(todas_lon) + max(todas_lon)) / 2,
+                                   zoom=zoom_para(todas_lat, todas_lon))
+        mapa = pdk.Deck(layers=capas_mapa, initial_view_state=vista_mapa, map_style=None,
                         tooltip={"html": "<b>{id}</b> · {nombre}<br/>{proyecto} · "
                                          "{componente}<br/>{estado_txt}",
                                  "style": {"backgroundColor": "#0F172A", "color": "white",
@@ -461,13 +509,15 @@ with tab_pub:
         serie = del_punto[del_punto["parametro"] == par_sel].sort_values("fecha")
         ultimo = serie.iloc[-1]
         fila_base = base[(base["punto_id"] == punto_sel) & (base["parametro"] == par_sel)]
-        rango_base = rango(fila_base.iloc[0], par_sel) if not fila_base.empty and \
-            fila_base.iloc[0]["n"] >= 3 else None
+        n_base = int(fila_base.iloc[0]["n"]) if not fila_base.empty else 0
+        rango_base = rango(fila_base.iloc[0], par_sel) if n_base >= 1 else None
         proy = puntos.loc[puntos["id"] == punto_sel, "proyecto_id"].iloc[0]
         fechas_base = [c["fecha"] for c in campanias.values()
                        if c["proyecto_id"] == proy and c["tipo"] == TIPO_BASE]
         fin_base = max(fechas_base) + timedelta(days=45) if fechas_base else None
         operacion = serie[serie["fecha"] > (max(fechas_base) if fechas_base else date.min)]
+        if operacion.empty:
+            fin_base = None          # todo el historial del punto es línea de base
         pendiente = tendencia_anual(list(operacion["fecha"]), list(operacion["valor"]))
         unidad = ultimo["unidad"]
         uso = puntos.loc[puntos["id"] == punto_sel, "uso"].iloc[0]
@@ -493,9 +543,12 @@ with tab_pub:
                         width="stretch")
         explicacion = [f"**Por qué este estado:** {ultimo['motivo']}"]
         if rango_base:
-            explicacion.append(f"La franja gris es el rango natural del punto antes del proyecto "
-                               f"(línea de base, con su tolerancia): {fmt(rango_base[0])} a "
-                               f"{fmt(rango_base[1])} {unidad}.")
+            explicacion.append(
+                f"La franja gris es lo que el punto registraba antes del proyecto (línea de base, "
+                f"{n_base} campaña{'s' if n_base != 1 else ''}, con su tolerancia): "
+                f"{fmt(rango_base[0])} a {fmt(rango_base[1])} {unidad}."
+                + ("" if n_base >= 3 else " Con menos de tres campañas sirve para saber si una "
+                   "superación ya existía, no para marcar desvíos."))
         nota = campanias[ultimo["campania_id"]]["justificaciones"].get(
             f"{punto_sel}|{par_sel}")
         if nota:
@@ -507,7 +560,9 @@ with tab_pub:
                 "Fecha": serie["fecha"], "Campaña": serie["campania_id"],
                 "Valor": [valor_txt(c, v) for c, v in zip(serie["calificador"], serie["valor"])],
                 "Unidad": serie["unidad"], "Estado": serie["estado"].map(etiqueta),
-                "Por qué": serie["motivo"]}), hide_index=True, width="stretch")
+                "Por qué": serie["motivo"],
+                **({"Fuente": serie["fuente"].fillna("")} if "fuente" in serie.columns
+                   else {})}), hide_index=True, width="stretch")
 
         with st.expander("Cómo leer estos datos"):
             for e, d in ESTADOS.items():
@@ -549,7 +604,8 @@ def usar_ejemplo():
     # Va como callback: cambia el proyecto elegido, y el estado de un widget
     # solo se puede tocar antes de que se dibuje.
     st.session_state.usar_ejemplo = True
-    st.session_state.emp_proyecto = "SALAR-A"
+    st.session_state.emp_proyecto = META["demo_proyecto"]
+    st.session_state.emp_fecha = date.fromisoformat(META["demo_fecha"])
     st.session_state.borrador = None
 
 
@@ -585,18 +641,16 @@ with tab_emp:
     with c1:
         emp_proy = st.selectbox("Proyecto", [p["id"] for p in PROYECTOS], key="emp_proyecto",
                                 format_func=nombre_proyecto)
+        if "emp_fecha" not in st.session_state:
+            st.session_state.emp_fecha = date.fromisoformat(META["demo_fecha"])
         emp_fecha = st.date_input("Fecha de muestreo (si la planilla no la trae)",
-                                  value=date(2026, 9, 3), format="DD/MM/YYYY",
-                                  key="emp_fecha")
+                                  format="DD/MM/YYYY", key="emp_fecha")
         archivo = st.file_uploader("Planilla del laboratorio: Excel con una o varias hojas, o CSV",
                                    type=["xlsx", "csv"], key="emp_archivo")
     with c2:
         st.markdown("**¿No tenés una planilla a mano?**")
-        st.caption("La del ejemplo es la de un laboratorio real en forma: cuatro hojas, "
-                   "encabezados a su manera, coma decimal y «<0,005» para lo no detectado. "
-                   "Trae cuatro errores sembrados para ver qué hace el sistema con ellos.")
-        st.button("Usar la planilla de ejemplo (Proyecto Salar A)", type="primary",
-                  width="stretch", on_click=usar_ejemplo)
+        st.caption(META["demo_texto"])
+        st.button(META["demo_boton"], type="primary", width="stretch", on_click=usar_ejemplo)
         st.download_button("Descargar la planilla de ejemplo",
                            data=st.session_state.ejemplo,
                            file_name="planilla-laboratorio-ejemplo.xlsx",
@@ -743,7 +797,9 @@ with tab_emp:
             presentar = st.button(f"Presentar la campaña {cid} a la autoridad", type="primary",
                                   disabled=bool(faltan), key="emp_presentar")
             if presentar and not faltan:
-                campania = existente or nueva_campania(emp_proy, emp_fecha)
+                campania = existente or nueva_campania(
+                    proyectos[emp_proy], emp_fecha, META["demo_tipo"],
+                    esc.get("demo_campania") if META.get("real") else None)
                 campania["justificaciones"] = {k: v for k, v in
                                                borrador["justificaciones"].items() if v.strip()}
                 try:
@@ -769,6 +825,98 @@ with tab_emp:
                     st.rerun()
 
 # =========================================================================
+# Cumplimiento: las condiciones de la DIA y el programa de monitoreo del PGA.
+# El estado de cada obligación lo declara la empresa: el sistema no lo infiere.
+# =========================================================================
+ESTADOS_OBLIGACION = ["Sin relevar", "Pendiente", "En curso", "Cumplida", "No aplica"]
+
+if tab_cum is not None:
+    with tab_cum:
+        obl = esc["obligaciones"]
+        prog = esc["programa"]
+        hoy_c = date.today()
+        if not obl.empty:
+            if "obl_editadas" not in st.session_state:
+                st.session_state.obl_editadas = obl.assign(
+                    estado="Sin relevar", responsable="", evidencia="")
+            tabla_obl = st.session_state.obl_editadas
+            vence = pd.to_datetime(tabla_obl["vence"], errors="coerce").dt.date
+            abiertas = ~tabla_obl["estado"].isin(["Cumplida", "No aplica"])
+            proximas = sorted(v for v, a in zip(vence, abiertas) if a and pd.notna(v)
+                              and v >= hoy_c)
+            # Vencida es lo que la empresa marcó como abierto y ya pasó su plazo.
+            # Lo que nadie relevó todavía no se presume incumplido.
+            marcadas = tabla_obl["estado"].isin(["Pendiente", "En curso"])
+            vencidas = [f"{i} ({v:%d/%m/%Y})" for i, v, m in
+                        zip(tabla_obl["item"], vence, marcadas) if m and pd.notna(v) and v < hoy_c]
+            franja([
+                (len(tabla_obl), "obligaciones relevadas"),
+                (tabla_obl["jurisdiccion"].nunique(), "jurisdicciones"),
+                (int(vence.notna().sum()), "con plazo fijo"),
+                (int((tabla_obl["estado"] == "Sin relevar").sum()), "sin estado cargado"),
+                (f"{proximas[0]:%d/%m/%Y}" if proximas else "—", "próximo vencimiento"),
+            ])
+            if vencidas:
+                st.warning("Con plazo vencido y marcadas como abiertas: " + ", ".join(vencidas))
+            st.markdown("##### Condiciones de las DIA y compromisos")
+            st.caption("Cada fila cita la resolución y el ítem del que sale. El estado, el "
+                       "responsable y la evidencia los completa la empresa: el tablero no "
+                       "presume que algo esté cumplido. Los vencimientos con plazo en días se "
+                       "cuentan desde la fecha indicada en «Desde» y hay que confirmarlos con "
+                       "la fecha de notificación.")
+            columnas_obl = {
+                "jurisdiccion": st.column_config.TextColumn("Jurisdicción", disabled=True),
+                "item": st.column_config.TextColumn("Ítem", disabled=True, width="small"),
+                "requisito": st.column_config.TextColumn("Qué exige", disabled=True,
+                                                         width="large"),
+                "plazo": st.column_config.TextColumn("Plazo / frecuencia", disabled=True),
+                "vence": st.column_config.DateColumn("Vence (estimado)", disabled=True,
+                                                     format="DD/MM/YYYY"),
+                "estado": st.column_config.SelectboxColumn("Estado", options=ESTADOS_OBLIGACION,
+                                                           required=True),
+                "responsable": st.column_config.TextColumn("Responsable"),
+                "evidencia": st.column_config.TextColumn("Evidencia"),
+                "fuente": st.column_config.TextColumn("Fuente", disabled=True),
+            }
+            visibles = [c for c in columnas_obl if c in tabla_obl.columns]
+            editada = st.data_editor(
+                tabla_obl.assign(vence=vence)[visibles], hide_index=True, width="stretch",
+                column_config=columnas_obl, key="obl_editor")
+            for col in ("estado", "responsable", "evidencia"):
+                st.session_state.obl_editadas[col] = editada[col].values
+        if not prog.empty:
+            st.markdown("##### Programa de monitoreo del PGA")
+            ultima_por_punto = {}
+            for c in campanias.values():
+                if c["estado"] != APROBADA:
+                    continue
+                for pid_ in set(st.session_state.resultados.loc[
+                        st.session_state.resultados["campania_id"] == c["id"], "punto_id"]):
+                    ultima_por_punto[pid_] = max(ultima_por_punto.get(pid_, c["fecha"]),
+                                                 c["fecha"])
+            filas_prog = []
+            for r in prog.to_dict("records"):
+                ids = [x.strip() for x in r.get("puntos", "").split(";") if x.strip()]
+                fechas = [ultima_por_punto[i] for i in ids if i in ultima_por_punto]
+                filas_prog.append({
+                    "Componente": r.get("componente", ""),
+                    "Puntos": len(ids) if ids else r.get("n_puntos", ""),
+                    "Parámetros": r.get("parametros", ""),
+                    "Frecuencia": r.get("frecuencia", ""),
+                    "Último dato en el tablero": max(fechas) if fechas else None,
+                    "Referencia": r.get("norma", ""),
+                    "Fuente": r.get("fuente", ""),
+                })
+            st.dataframe(pd.DataFrame(filas_prog), hide_index=True, width="stretch",
+                         column_config={
+                             "Último dato en el tablero": st.column_config.DateColumn(
+                                 format="DD/MM/YYYY"),
+                             "Parámetros": st.column_config.TextColumn(width="large")})
+            st.caption("«Último dato en el tablero» es la campaña más reciente cargada para esos "
+                       "puntos. En este prototipo solo está la línea de base del IIA: las "
+                       "campañas posteriores a la DIA se incorporan en la implementación.")
+
+# =========================================================================
 # Autoridad: revisar, observar o aprobar. Lo aprobado se publica.
 # =========================================================================
 with tab_aut:
@@ -781,9 +929,12 @@ with tab_aut:
         ultima_c = max(mias, key=lambda c: c["fecha"]) if mias else None
         # Campañas trimestrales: la próxima se espera tres meses después de la
         # última, con 30 días de margen para tener los resultados del laboratorio.
-        esperada = (ultima_c["fecha"] + timedelta(days=91)) if ultima_c else None
+        esperada = (ultima_c["fecha"] + timedelta(days=91)) if ultima_c and \
+            META["vencimientos"] else None
         margen = 30 - (hoy - esperada).days if esperada else None
-        if margen is None or hoy <= esperada:
+        if not META["vencimientos"]:
+            situacion = META.get("situacion", "—")
+        elif margen is None or hoy <= esperada:
             situacion = "al día"
         elif margen > 0:
             situacion = f"vence en {margen} d"
@@ -796,13 +947,15 @@ with tab_aut:
             "Última aprobada": max(c["fecha"] for c in aprobadas) if aprobadas else None,
             "En revisión": len([c for c in pendientes_p if c["estado"] == PRESENTADA]),
             "Observadas": len([c for c in pendientes_p if c["estado"] == OBSERVADA]),
-            "Próxima campaña esperada": esperada, "Situación": situacion})
+            **({"Próxima campaña esperada": esperada} if META["vencimientos"] else {}),
+            "Situación": situacion})
     st.markdown("##### Entregas por proyecto")
     st.dataframe(pd.DataFrame(filas_estado), hide_index=True, width="stretch",
                  column_config={
                      "Última aprobada": st.column_config.DateColumn(format="DD/MM/YYYY"),
                      "Próxima campaña esperada": st.column_config.DateColumn(format="DD/MM/YYYY")})
-    st.caption("Las campañas son trimestrales. El aviso de vencimientos es lo que CyMA (Santa "
+    st.caption(META.get("nota_entregas") or
+               "Las campañas son trimestrales. El aviso de vencimientos es lo que CyMA (Santa "
                "Cruz) hace por la autoridad: nadie tiene que acordarse de pedir lo que falta.")
 
     en_revision = sorted([c for c in campanias.values() if c["estado"] == PRESENTADA],
@@ -884,6 +1037,7 @@ with tab_con:
     sel_c = k1.selectbox("Campaña", [c["id"] for c in disponibles], key="con_campania",
                          format_func=lambda i: f"{i} · "
                          f"{ESTADOS_CAMPANIA[campanias[i]['estado']].split(' ·')[0]}")
+    asegurar_opcion("con_perfil", [p["id"] for p in perfiles], META.get("perfil"))
     sel_perfil = k2.selectbox("Jurisdicción", [p["id"] for p in perfiles], key="con_perfil",
                               format_func=lambda i: next(p["jurisdiccion"] for p in perfiles
                                                          if p["id"] == i))
@@ -983,11 +1137,12 @@ control y monitoreo ambiental* y una plataforma de interoperabilidad.
 
 #### Qué es real y qué no
 
-- **Datos sintéticos.** Ninguna empresa, proyecto, comunidad, laboratorio ni valor es real.
+{chr(10).join("- " + linea for linea in META["que_es_real"])}
 - **Niveles guía relevados de fuentes secundarias** (Ley 24.585 Anexo IV, Dec. 831/93 Anexo II,
   CAA art. 982). Cada uno lleva su norma; antes de usar datos reales hay que cotejarlos con el
-  Boletín Oficial. Para PM10 no se encontró un valor argentino confirmado: el aire se compara solo
-  contra la línea de base.
+  Boletín Oficial. Los de aire, suelo de uso industrial y ruido son los que aplica el Informe de
+  Impacto Ambiental de la línea de base, con la tabla y el tiempo de promedio que cita. El PM2,5
+  no tiene nivel guía en la Ley 24.585: se compara solo contra la línea de base.
 - **Ninguna conexión a sistemas oficiales.** No hay APIs públicas de carga; el prototipo genera
   los archivos que cada canal pide hoy y deja escrita la conexión por API.
 
@@ -999,7 +1154,7 @@ La investigación completa, con fuentes, está en
 st.markdown(
     '<div class="pie"><div class="nom">Tablero <span>Ambiental</span> Minero</div>'
     f'<div class="lema" style="font-size:13px">{LEMA}</div>'
-    '<div>Prototipo · datos sintéticos</div>'
+    f'<div>{META["pie"]}</div>'
     + "".join(f'<span class="norma">{n}</span>' for n in (
         "Ley 24.585", "Dec. 831/93", "CAA art. 982", "Dec. 7751-DEyP-2023", "Ley 6260 (Jujuy)"))
     + "</div>", unsafe_allow_html=True)

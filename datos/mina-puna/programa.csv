@@ -1,0 +1,13 @@
+componente,puntos,n_puntos,parametros,frecuencia,norma,fuente
+Calidad de aire,CA1;CA2;CA3;CA4,,"PM10, CO, SO₂, NO₂, plomo, ozono y H₂S",Semestral en construcción y en operación,"Ley 24.585, Anexo IV, Tabla 8","PGA (Salta, ago-2024), p. 41 y 47"
+Ruido,R1;R2;R3;R4;R5,,"Nivel sonoro (LAeq, 1 h)",Semestral (el mismo apartado dice también «trimestral»),Guías del Banco Mundial y de la US EPA,"PGA (Salta, ago-2024), p. 42 y 47"
+Suelo,,2 sitios (obrador y combustibles),Hidrocarburos totales,"Semestral, con auditoría al final de la construcción",No indicada en el PGA,"PGA (Salta, ago-2024), p. 42-43"
+Agua subterránea,PZ-7,"1 pozo, más 4 en operación",Calidad de agua (el PGA no lista los analitos),Semestral; mensual en los pozos de operación,"Ley 24.585, Anexo IV, Tabla 6","PGA (Salta, ago-2024), p. 43 y 47-48"
+Agua superficial,BQ;CR,3 cursos (uno sin agua hasta jul-2025),"Físico-químicos, metales y microbiología",Mensual (programa de control de 2025),No está en el PGA,"Respuesta a observaciones de Catamarca (sep-2025), p. 31-32"
+Flora,,14 parcelas,Riqueza y abundancia,Semestral (fin de la estación seca y de la lluviosa),No indicada en el PGA,"PGA (Salta, ago-2024), p. 43-44"
+Fauna,,"3 grupos (herpetofauna, aves, mamíferos)",Riqueza y abundancia,Semestral,No indicada en el PGA,"PGA (Salta, ago-2024), p. 44"
+Efluente cloacal,,1 cámara de muestreo,Parámetros de la Res. 011/01 (Tabla 26),Mensual,Res. 011/01 ex SEMADES (Salta),"PGA (Salta, ago-2024), p. 45-47"
+Residuos,,3 corrientes,"Volumen por mes, fracción reciclada, viajes",Mensual,Plan de gestión de residuos del PGA,"PGA (Salta, ago-2024), p. 45"
+Cianuro en la descarga a relaves,,Descarga al dique,CN WAD (< 1 mg/L),"Continuo, en línea",Código Internacional para el Manejo del Cianuro,"PGA (Salta, ago-2024), p. 58"
+Arqueología,,Programa y 3 sitios,Afectación de hallazgos,Según los frentes de obra,Autoridad de aplicación de cada provincia,"PGA (Salta, ago-2024), p. 44"
+Comunicación con las comunidades,,6 grupos de interés,"Asistencia, acuerdos y compromisos cumplidos",Mensual a trimestral,—,"PGA (Salta, ago-2024), p. 54-57"

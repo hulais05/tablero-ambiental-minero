@@ -17,21 +17,54 @@ cómo funciona, qué canales oficiales existen y qué normas aplican.
 
 ---
 
-## ⚠️ Sobre los datos
+## Sobre los datos
 
-**Todo es sintético.** Proyectos, empresas, comunidades, laboratorios y valores son ficticios.
-Las coordenadas caen en la Puna, pero no corresponden a ningún proyecto real. Lo que sí es realista
-son los órdenes de magnitud y los fenómenos que un tablero tiene que saber mostrar:
+El tablero arranca con **datos reales**: la línea de base ambiental de **Mina de la Puna**, un
+proyecto de plata y oro de la Puna entre Salta y Catamarca. Se publica sin el nombre del proyecto,
+de la empresa, de los laboratorios ni de las consultoras. Incluye:
+- 26 puntos de monitoreo;
+- unos 500 resultados de agua, aire, ruido y suelo, de 2007 a 2025;
+- el programa de monitoreo del Plan de Gestión Ambiental;
+- las obligaciones de la DIA de Catamarca.
+
+Cada resultado cita la tabla y la página de donde sale. Lo que se agregó o se corrigió al cargar
+está detallado en [`datos/mina-puna/FUENTES.md`](datos/mina-puna/FUENTES.md).
+
+Con datos reales aparece lo que un escenario inventado no muestra:
+- **Boro y arsénico por encima del nivel guía en casi todos los puntos, antes de cualquier
+  operación.** El tablero los clasifica como fondo natural.
+- **Límites de detección que no alcanzan.** El laboratorio informa mercurio y cromo con un límite
+  de detección mayor que el nivel guía para vida acuática. El resultado no prueba que cumpla, y el
+  tablero lo marca como no concluyente.
+- **Líneas de base cortas.** Varios puntos tienen una o dos campañas. Alcanzan para saber si una
+  superación ya existía, pero no para marcar desvíos, y el tablero lo dice.
+
+### El escenario sintético
+
+Sigue disponible con `TABLERO_DATOS=sintetico streamlit run app.py` y es la base de las pruebas del
+motor. Proyectos, empresas, comunidades, laboratorios y valores son ficticios. Las coordenadas caen
+en la Puna, pero no corresponden a ningún proyecto real. Lo realista son los órdenes de magnitud y
+los fenómenos que un tablero tiene que saber mostrar:
 - arsénico y boro naturales por encima del nivel guía;
 - un nivel freático que baja desde que empieza el bombeo;
 - picos de material particulado en temporada de viento;
 - un metal que sube aguas abajo de un dique de colas y baja con la medida correctiva;
 - un laboratorio cuyo límite de detección no alcanza para evaluar.
 
-**Los niveles guía se relevaron de fuentes secundarias** (Ley 24.585 Anexo IV, Dec. 831/93
-Anexo II, CAA art. 982). Cada valor lleva su norma y su estado de verificación en
-`core/catalogo.py`. Antes de usar el sistema con datos reales hay que cotejarlos con el Boletín
-Oficial.
+**Niveles guía.** Se relevaron de fuentes secundarias (Ley 24.585 Anexo IV, Dec. 831/93 Anexo II,
+CAA art. 982). A eso se suman los que aplica el Informe de Impacto Ambiental de la línea de base
+real: aire (Tabla 8), agua (Tablas 2 y 6), suelo de uso industrial y ruido. Cada valor lleva su
+norma y su estado de verificación en `core/catalogo.py`. Antes de usarlos para decidir hay que
+cotejarlos con el Boletín Oficial.
+
+**Agregar otro proyecto real** es agregar una carpeta en `datos/` con el mismo formato:
+- `proyecto.json`
+- `puntos.csv`
+- `campanias.csv`
+- `resultados.csv`
+- opcionales: `componentes.csv`, `contornos.csv`, `programa.csv` y `obligaciones.csv`
+
+`TABLERO_DATOS=<carpeta>` elige cuál se muestra.
 
 ---
 
@@ -56,12 +89,13 @@ python -m pytest
 
 ---
 
-## Las cinco vistas
+## Las vistas
 
 | Pestaña | Quién | Qué hace |
 |---|---|---|
 | 🌎 **Ciudadanía** | Público | Mapa, estado de cada punto, serie histórica contra el nivel guía y la línea de base, datos abiertos. **Solo lo aprobado.** |
 | 🏭 **Empresa** | Responsable ambiental | Sube la planilla del laboratorio, corrige lo que el sistema marca, justifica las superaciones y presenta |
+| 📋 **Cumplimiento** | Empresa | Condiciones de la DIA con su plazo, y el programa de monitoreo del PGA con el último dato cargado. Solo con datos reales |
 | 🏛️ **Autoridad** | Técnico de control | Vencimientos por proyecto, revisión de lo presentado, aprobación u observación con firma |
 | 🔌 **Conectores** | Empresa | La misma campaña en el formato de cada canal oficial |
 | 📚 **Cómo funciona** | Todos | Qué replica, qué es real y qué no |
@@ -84,9 +118,9 @@ python -m pytest
 | Estado | Cuándo |
 |---|---|
 | ▲ **Supera nivel guía** | Supera el nivel guía del uso del punto y no se explica por la línea de base |
-| ◆ **Atención** | Está al 80 % o más del nivel guía, o fuera del rango de la línea de base |
+| ◆ **Atención** | Está al 80 % o más del nivel guía (en escalas lineales), o fuera del rango de la línea de base (con al menos tres campañas) |
 | ✚ **No concluyente** | El límite de detección del laboratorio es mayor que el nivel guía, o falta la dureza para elegir el nivel |
-| ■ **Fondo natural** | Supera el nivel guía, pero dentro del rango que el punto ya tenía antes del proyecto |
+| ■ **Fondo natural** | Supera el nivel guía, pero no está peor que antes del proyecto: la línea de base ya lo superaba |
 | ● **Cumple** | Dentro del nivel guía y de la línea de base |
 | ○ **Sin referencia** | Sin nivel guía ni línea de base con qué comparar |
 
@@ -132,6 +166,8 @@ guarda en el repositorio.
 app.py                  Interfaz: ciudadanía, empresa, autoridad, conectores, cómo funciona
 core/catalogo.py        Matrices, parámetros, sinónimos, unidades, usos y niveles guía con su norma
 core/datos.py           Escenario sintético, planilla de laboratorio de ejemplo e ingesta
+core/escenario.py       Elige y carga los datos: reales (datos/) o sintéticos
+datos/mina-puna/        Línea de base real, programa del PGA y obligaciones, con sus fuentes
 core/validacion.py      Línea de base, semáforo de seis estados y control de carga
 core/flujo.py           Estados de la campaña, quién puede hacer cada paso, historial
 core/conectores.py      Exportadores por canal, Gauss-Krüger, SensorThings y envío por API
@@ -154,4 +190,5 @@ publicación, y su salida a los canales oficiales que existen hoy.
 
 Sobre el motor: acierta los fenómenos sembrados en el escenario sintético, **y eso no es un
 resultado**. Los datos se generaron sabiendo qué tenía que encontrar. Es verificación del
-circuito, no medición de calidad.
+circuito, no medición de calidad. Los datos reales sirven para ver cómo se comporta con una línea
+de base de verdad: irregular, con huecos y con campañas que cubren solo parte de la red.

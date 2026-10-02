@@ -372,18 +372,31 @@ def generar_escenario(semilla=2026):
     }
 
 
-def nueva_campania(proyecto_id, fecha, tipo=TIPO_MAP):
-    """Campaña en borrador, lista para recibir los resultados de una planilla."""
-    proyecto = next(p for p in PROYECTOS if p["id"] == proyecto_id)
-    letra = proyecto_id.split("-")[1]
+def nueva_campania(proyecto, fecha, tipo=TIPO_MAP, datos=None):
+    """Campaña en borrador, lista para recibir los resultados de una planilla.
+
+    `proyecto` es el registro del proyecto (o su id, en el escenario
+    sintético). `datos` trae laboratorio, consultora y participantes cuando se
+    conocen; si no, quedan los del escenario sintético.
+    """
+    if isinstance(proyecto, str):
+        proyecto = next(p for p in PROYECTOS if p["id"] == proyecto)
+    pid = proyecto["id"]
+    if datos is None:
+        letra = pid.split("-")[1] if "-" in pid else pid
+        datos = {"laboratorio": f"{proyecto.get('laboratorio', 'Laboratorio')} (ficticio)",
+                 "acreditacion": "ISO/IEC 17025",
+                 "consultora": "Consultora ambiental (ficticia)",
+                 "participantes": [f"Comunidad {letra}", "Municipio",
+                                   "Autoridad minera provincial",
+                                   "Autoridad ambiental provincial"]}
     return {
-        "id": f"{proyecto_id}-{fecha.year}-{fecha.month:02d}",
-        "proyecto_id": proyecto_id, "fecha": fecha, "tipo": tipo,
-        "laboratorio": f"{proyecto['laboratorio']} (ficticio)",
-        "acreditacion": "ISO/IEC 17025",
-        "consultora": "Consultora ambiental (ficticia)",
-        "participantes": [f"Comunidad {letra}", "Municipio", "Autoridad minera provincial",
-                          "Autoridad ambiental provincial"],
+        "id": f"{pid}-{fecha.year}-{fecha.month:02d}",
+        "proyecto_id": pid, "fecha": fecha, "tipo": tipo,
+        "laboratorio": datos.get("laboratorio", "s/d"),
+        "acreditacion": datos.get("acreditacion", "s/d"),
+        "consultora": datos.get("consultora", "s/d"),
+        "participantes": list(datos.get("participantes", [])),
         "estado": "BORRADOR", "historial": [], "justificaciones": {},
     }
 
@@ -483,6 +496,99 @@ def libro_laboratorio_ejemplo(escenario):
                 tabla.loc[i, "Hg (mg/kg)"] = "s/d"
             tabla.to_excel(libro, sheet_name=hoja, index=False)
     return salida.getvalue()
+
+
+# Etiqueta corta con la que un laboratorio encabeza cada parámetro. Lo que no
+# está acá se encabeza con el nombre del catálogo.
+_ETIQUETA_LAB = {
+    "ph": "pH", "conductividad": "CE", "sdt": "SDT", "dureza": "Dureza total",
+    "arsenico": "As", "boro": "B", "litio": "Li", "potasio": "K", "magnesio": "Mg",
+    "plomo": "Pb", "cadmio": "Cd", "cromo": "Cr total", "cobre": "Cu", "zinc": "Zn",
+    "mercurio": "Hg", "hierro": "Fe", "manganeso": "Mn", "sulfatos": "Sulfatos",
+    "cloruros": "Cloruros", "nitratos": "Nitratos", "cianuro": "CN total",
+    "nivel_freatico": "Nivel freático", "pm10": "PM10 24 h", "nivel_sonoro": "LAeq",
+}
+
+# Hojas de la planilla de un escenario real: una por grupo de matrices.
+_HOJAS_REALES = [
+    ("Aguas", ("agua_superficial", "agua_subterranea")),
+    ("Aire y ruido", ("aire", "ruido")),
+    ("Suelos y sedimentos", ("suelo", "sedimento", "costra_salina")),
+]
+
+
+def _encabezado(parametro, unidad):
+    from .catalogo import nombre_parametro
+    etiqueta = _ETIQUETA_LAB.get(parametro) or nombre_parametro(parametro)
+    return f"{etiqueta} ({unidad})" if unidad and unidad != "upH" else etiqueta
+
+
+def libro_laboratorio(escenario):
+    """XLSX de la campaña de la demostración, como lo entregaría el laboratorio.
+
+    En el escenario sintético es la planilla de siempre. En uno real se arma
+    con los valores tal cual los informó el laboratorio, más los errores de
+    carga que el escenario declara en su proyecto.json (`errores_demo`), para
+    que se vea qué hace el control con ellos. Esos errores son lo único que
+    no viene de la fuente, y la interfaz lo dice.
+    """
+    meta = escenario.get("meta", {})
+    if not meta.get("real"):
+        return libro_laboratorio_ejemplo(escenario)
+    demo = escenario["demo"]
+    puntos = escenario["puntos"].set_index("id")
+    errores = meta.get("errores_demo", [])
+    salida = io.BytesIO()
+    with pd.ExcelWriter(salida, engine="openpyxl") as libro:
+        for hoja, matrices in _HOJAS_REALES:
+            parte = demo[demo["matriz"].isin(matrices)]
+            if parte.empty:
+                continue
+            columnas = []
+            for par, uni in parte[["parametro", "unidad"]].drop_duplicates().itertuples(
+                    index=False):
+                if (par, uni) not in columnas:
+                    columnas.append((par, uni))
+            from .catalogo import PARAMETROS
+            orden = list(PARAMETROS)
+            columnas.sort(key=lambda c: orden.index(c[0]) if c[0] in orden else len(orden))
+            filas = []
+            for (pid, fecha), grupo in parte.groupby(["punto_id", "fecha"], sort=True):
+                valores = {r.parametro: r for r in grupo.itertuples()}
+                fila = {"Punto de muestreo": pid,
+                        "Fecha de muestreo": fecha.strftime("%d/%m/%Y")}
+                for par, uni in columnas:
+                    r = valores.get(par)
+                    if r is None:
+                        fila[_encabezado(par, uni)] = ""
+                    elif hay_texto(getattr(r, "valor_original", "")):
+                        fila[_encabezado(par, uni)] = str(r.valor_original)
+                    else:
+                        fila[_encabezado(par, uni)] = _texto_lab(r.calificador, r.valor)
+                fila["Observaciones"] = ""
+                filas.append(fila)
+            tabla = pd.DataFrame(filas)
+            for e in errores:
+                if e.get("hoja") != hoja:
+                    continue
+                donde = tabla.index[tabla["Punto de muestreo"] == e["punto"]]
+                if len(donde) == 0:
+                    continue
+                i = donde[0]
+                if e["tipo"] == "valor":
+                    tabla.loc[i, e["columna"]] = e["valor"]
+                    if e.get("observacion"):
+                        tabla.loc[i, "Observaciones"] = e["observacion"]
+                elif e["tipo"] == "punto":
+                    copia = tabla.loc[[i]].copy()
+                    copia["Punto de muestreo"] = e["valor"]
+                    tabla = pd.concat([tabla, copia], ignore_index=True)
+            tabla.to_excel(libro, sheet_name=hoja, index=False)
+    return salida.getvalue()
+
+
+def hay_texto(x):
+    return x is not None and not (isinstance(x, float) and math.isnan(x)) and str(x).strip() != ""
 
 
 # ------------------------------------------------------------------ ingesta ---

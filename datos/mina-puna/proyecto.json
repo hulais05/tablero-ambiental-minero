@@ -1,0 +1,61 @@
+{
+ "proyecto": {
+  "id": "PUNA",
+  "nombre": "Proyecto de plata y oro",
+  "empresa": "Mina de la Puna",
+  "provincia": "Salta y Catamarca",
+  "mineral": "Plata y oro",
+  "etapa": "Factibilidad, con DIA de explotación",
+  "lat": -25.30127,
+  "lon": -66.78892,
+  "laboratorio": "Laboratorio externo A (acreditado)"
+ },
+ "demo_campania": "PUNA-2025-04",
+ "demo_campania_datos": {
+  "laboratorio": "Laboratorio externo A (acreditado)",
+  "acreditacion": "s/d",
+  "consultora": "s/d",
+  "participantes": []
+ },
+ "errores_demo": [
+  {
+   "hoja": "Aguas",
+   "punto": "BQ",
+   "tipo": "valor",
+   "columna": "As (mg/L)",
+   "valor": "63",
+   "observacion": "Repetida por control de calidad"
+  },
+  {
+   "hoja": "Aguas",
+   "punto": "CR",
+   "tipo": "punto",
+   "valor": "C-R"
+  },
+  {
+   "hoja": "Aguas",
+   "punto": "CR",
+   "tipo": "valor",
+   "columna": "pH",
+   "valor": "81"
+  }
+ ],
+ "textos": {
+  "subtitulo": "Mina de la Puna: la línea de base ambiental real de un proyecto de plata y oro de la Puna, entre Salta y Catamarca. La empresa carga, la autoridad controla, la ciudadanía consulta.",
+  "aviso_datos": "Datos reales, sin el nombre del proyecto ni de la empresa: línea de base del Informe de Impacto Ambiental de explotación (Salta, 2024) y monitoreos posteriores (2024-2025). La planilla de la demostración trae tres errores de carga agregados a propósito; todo lo demás es como lo informó el laboratorio.",
+  "pie": "Prototipo · datos reales de línea de base · Mina de la Puna",
+  "firma_empresa": "Responsable ambiental · Mina de la Puna",
+  "firma_autoridad": "Revisor · Autoridad minera provincial",
+  "demo_boton": "Usar la planilla de abril de 2025 (laboratorio)",
+  "demo_texto": "Es la campaña mensual de abril de 2025: dos puntos de agua superficial, 35 parámetros cada uno, con los valores tal como los informó el laboratorio. Le agregamos tres errores de carga para ver qué hace el sistema con ellos.",
+  "demo_tipo": "Monitoreo mensual",
+  "vencimientos": false,
+  "perfil": "salta",
+  "situacion": "solo línea de base cargada",
+  "nota_entregas": "El prototipo tiene cargada la línea de base. El aviso de vencimientos se arma con el calendario del PGA cuando se cargan las campañas de construcción: ver la pestaña Cumplimiento.",
+  "que_es_real": [
+   "**Datos reales de línea de base**, publicados sin el nombre del proyecto ni de la empresa: 26 puntos y unos 500 resultados de agua, aire, ruido y suelo, de 2007 a 2025, transcriptos del Informe de Impacto Ambiental de explotación y de sus respuestas a observaciones. Cada resultado cita su tabla y página ([`datos/mina-puna/FUENTES.md`](https://github.com/hulais05/tablero-ambiental-minero/blob/main/datos/mina-puna/FUENTES.md)).",
+   "**Lo agregado a mano está a la vista:** tres errores de carga en la planilla de la demostración y las fechas que la fuente da solo por mes (se toma el día 15)."
+  ]
+ }
+}

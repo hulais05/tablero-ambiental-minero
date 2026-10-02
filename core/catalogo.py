@@ -44,6 +44,7 @@ USOS = {
     "residencial": "Suelo de uso residencial",
     "industrial": "Suelo de uso industrial",
     "aire_ambiente": "Calidad de aire ambiente",
+    "ruido_industrial": "Ruido en área industrial (horario diurno)",
 }
 
 # --- Parámetros -------------------------------------------------------------------
@@ -79,18 +80,53 @@ PARAMETROS = {
     "zinc": {"nombre": "Zinc", "alias": ["zn", "zinc", "cinc", "zinc_total"]},
     "mercurio": {"nombre": "Mercurio", "alias": ["hg", "mercurio", "mercurio_total"]},
     "hierro": {"nombre": "Hierro", "alias": ["fe", "hierro", "hierro_total"]},
-    "manganeso": {"nombre": "Manganeso", "alias": ["mn", "manganeso"]},
+    "manganeso": {"nombre": "Manganeso", "alias": ["mn", "manganeso", "manganeso_total"]},
+    "aluminio": {"nombre": "Aluminio", "alias": ["al", "aluminio", "aluminio_total"]},
+    "antimonio": {"nombre": "Antimonio", "alias": ["sb", "antimonio", "antimonio_total"]},
+    "bario": {"nombre": "Bario", "alias": ["ba", "bario", "bario_total"]},
+    "berilio": {"nombre": "Berilio", "alias": ["be", "berilio", "berilio_total"]},
+    "cobalto": {"nombre": "Cobalto", "alias": ["cobalto", "cobalto_total"]},
+    "niquel": {"nombre": "Níquel", "alias": ["ni", "niquel", "niquel_total"]},
+    "uranio": {"nombre": "Uranio", "alias": ["u", "uranio", "uranio_total"]},
+    "vanadio": {"nombre": "Vanadio", "alias": ["v", "vanadio", "vanadio_total"]},
+    "sodio": {"nombre": "Sodio", "alias": ["na", "sodio", "sodio_total"]},
+    "calcio": {"nombre": "Calcio", "alias": ["ca", "calcio", "calcio_total"]},
     "sulfatos": {"nombre": "Sulfatos", "alias": ["sulfatos", "sulfato", "so4"]},
     "cloruros": {"nombre": "Cloruros", "alias": ["cloruros", "cloruro", "cl"]},
     "nitratos": {"nombre": "Nitratos", "alias": ["nitratos", "nitrato", "no3"]},
+    "nitritos": {"nombre": "Nitritos", "alias": ["nitritos", "nitrito"]},
+    "fluoruros": {"nombre": "Fluoruros", "alias": ["fluoruros", "fluoruro", "fluor", "f"]},
+    "amonio": {"nombre": "Amonio", "alias": ["amonio", "nh4"]},
+    "turbidez": {"nombre": "Turbidez", "unidad": "NTU", "alias": ["turbidez", "turbiedad"]},
     "cianuro": {"nombre": "Cianuro", "alias": ["cianuro", "cianuros", "cn", "cianuro_total",
                                                "cn_total"]},
+    "molibdeno": {"nombre": "Molibdeno", "alias": ["mo", "molibdeno", "molibdeno_total"]},
+    "plata": {"nombre": "Plata", "alias": ["ag", "plata", "plata_total"]},
+    "selenio": {"nombre": "Selenio", "alias": ["se", "selenio", "selenio_total"]},
+    "hidrocarburos": {"nombre": "Hidrocarburos totales",
+                      "alias": ["htp", "tph", "hidrocarburos", "hidrocarburos_totales",
+                                "hidrocarburos_totales_petroleo"]},
     "nivel_freatico": {"nombre": "Profundidad del nivel freático", "unidad": "m",
                        "alias": ["nivel_freatico", "nivel_estatico", "profundidad_nivel",
                                  "nivel_agua", "prof_nivel", "nf"]},
     "pm10": {"nombre": "Material particulado PM10 (24 h)", "unidad": "µg/m³",
              "alias": ["pm10", "mp10", "pm_10", "material_particulado_pm10",
-                       "material_particulado_10"]},
+                       "material_particulado_pm_10", "material_particulado_10",
+                       "material_particulado_fraccion_respirable"]},
+    "pm25": {"nombre": "Material particulado PM2,5 (24 h)", "unidad": "µg/m³",
+             "alias": ["pm25", "pm2_5", "pm_2_5", "pm2,5", "pm_2,5", "mp2_5", "mp_2_5",
+                       "material_particulado_pm2_5", "material_particulado_pm_2_5",
+                       "material_particulado_pm2,5", "material_particulado_pm_2,5"]},
+    # "CO" y "NO2" a secas no son sinónimos: en una planilla de aguas son el
+    # cobalto y los nitritos. Los gases se reconocen por su nombre.
+    "co": {"nombre": "Monóxido de carbono", "alias": ["monoxido_carbono"]},
+    "so2": {"nombre": "Dióxido de azufre", "alias": ["so2", "dioxido_azufre"]},
+    "no2": {"nombre": "Dióxido de nitrógeno",
+            "alias": ["dioxido_nitrogeno", "oxidos_nitrogeno", "nox"]},
+    "h2s": {"nombre": "Sulfuro de hidrógeno",
+            "alias": ["h2s", "sh2", "sulfuro_hidrogeno", "acido_sulfhidrico"]},
+    "ozono": {"nombre": "Ozono (oxidantes fotoquímicos)",
+              "alias": ["o3", "ozono", "oxidantes_fotoquimicos"]},
     "nivel_sonoro": {"nombre": "Nivel sonoro continuo equivalente (LAeq)", "unidad": "dBA",
                      "alias": ["nivel_sonoro", "laeq", "leq", "ruido", "nps",
                                "nivel_presion_sonora"]},
@@ -158,6 +194,7 @@ _UNIDADES = {
     "mg/l": ("liquido", 1.0), "ug/l": ("liquido", 1e-3), "g/l": ("liquido", 1e3),
     "ng/l": ("liquido", 1e-6),
     "mg/kg": ("solido", 1.0), "ug/kg": ("solido", 1e-3), "g/kg": ("solido", 1e3),
+    "ug/g": ("solido", 1.0), "mg/g": ("solido", 1e3),
     "%": ("solido", 1e4),
     "ug/m3": ("aire", 1.0), "mg/m3": ("aire", 1e3),
     "us/cm": ("conductividad", 1.0), "ms/cm": ("conductividad", 1e3),
@@ -167,6 +204,7 @@ _UNIDADES = {
     "m": ("longitud", 1.0), "cm": ("longitud", 0.01), "mbbp": ("longitud", 1.0),
     "mbnt": ("longitud", 1.0),
     "dba": ("sonido", 1.0), "db(a)": ("sonido", 1.0), "db": ("sonido", 1.0),
+    "ntu": ("turbidez", 1.0), "unt": ("turbidez", 1.0),
 }
 
 # ppm y ppb dependen de la matriz: en agua son mg/L y µg/L; en suelo, mg/kg y µg/kg.
@@ -174,7 +212,7 @@ _AMBIGUAS = {"ppm": 1.0, "ppb": 1e-3}
 
 _MAGNITUD_CANONICA = {
     "mg/L": "liquido", "mg/kg": "solido", "µg/m³": "aire", "µS/cm": "conductividad",
-    "upH": "ph", "m": "longitud", "dBA": "sonido",
+    "upH": "ph", "m": "longitud", "dBA": "sonido", "NTU": "turbidez",
 }
 
 
@@ -245,13 +283,15 @@ def tolerancia(parametro):
 # Relevados de fuentes públicas secundarias (ver INVESTIGACION.md, sección 4).
 # `estado` dice qué tan firme es cada valor:
 #   "confirmado"  la cifra y la tabla aparecen en la fuente citada;
-#   "a verificar" la cifra aparece, pero la tabla o el contexto son dudosos.
+#   "a verificar" la cifra aparece, pero la tabla o el contexto son dudosos;
+#   "según IIA"   la cifra es la que aplica un Informe de Impacto Ambiental
+#                 aprobado, citando la norma.
 # Antes de usar el sistema con datos reales, todos se cotejan contra el texto
 # del Boletín Oficial: un nivel guía mal cargado es un semáforo mal pintado.
 #
 # Lo que no se encontró no se inventa. Sin nivel guía, el valor se compara solo
-# contra la línea de base del punto. Es el caso del PM10: no apareció una cifra
-# argentina confirmada, y poner la de otro país sería decidir por la autoridad.
+# contra la línea de base del punto. Es el caso del PM2,5: la Ley 24.585 no lo
+# trae, y poner la cifra de otro país sería decidir por la autoridad.
 
 LEY_24585_T1 = "Ley 24.585, Anexo IV, Tabla 1"
 LEY_24585_T2 = "Ley 24.585, Anexo IV, Tabla 2"
@@ -262,6 +302,9 @@ DEC_831_T2 = "Dec. 831/93, Anexo II, Tabla 2"
 DEC_831_T5 = "Dec. 831/93, Anexo II, Tabla 5"
 DEC_831_T9 = "Dec. 831/93, Anexo II, Tabla 9"
 CAA_982 = "Código Alimentario Argentino, art. 982"
+LEY_24585_T8 = "Ley 24.585, Anexo IV, Tabla 8"
+LEY_24585_SUELO_IND = "Ley 24.585, Anexo IV, suelo de uso industrial"
+IFC_RUIDO = "Guías generales MASS del Grupo Banco Mundial / IFC (2007), 1.7 Ruido"
 
 
 def _g(parametro, uso, maximo=None, minimo=None, norma="", estado="confirmado",
@@ -323,13 +366,72 @@ NIVELES_GUIA = [
     _g("arsenico", "riego", 0.1, norma=f"{LEY_24585_T5} · {DEC_831_T5}"),
     _g("boro", "riego", 0.5, norma=f"{LEY_24585_T5} · {DEC_831_T5}"),
     _g("litio", "riego", 2.5, norma=DEC_831_T5),
-    _g("arsenico", "bebida_ganado", 0.5, norma=LEY_24585_T6, estado="a verificar"),
-    _g("boro", "bebida_ganado", 5.0, norma=LEY_24585_T6, estado="a verificar"),
+    # Bebida de ganado: las dos cifras las confirma la tabla que transcribe el
+    # IIA de la Puna (ver más abajo).
+    _g("arsenico", "bebida_ganado", 0.5, norma=LEY_24585_T6, estado="según IIA"),
+    _g("boro", "bebida_ganado", 5.0, norma=LEY_24585_T6, estado="según IIA"),
 
     # Suelos (mg/kg de peso seco). Solo el arsénico apareció confirmado.
     _g("arsenico", "agricola", 20, norma=DEC_831_T9),
     _g("arsenico", "residencial", 30, norma=DEC_831_T9),
     _g("arsenico", "industrial", 50, norma=DEC_831_T9),
+
+    # Valores que un Informe de Impacto Ambiental de la Puna (2024) toma de la
+    # Ley 24.585 y aplica en su línea de base: se cargan como los cita ese
+    # informe, con la tabla y el tiempo de promedio. `estado="según IIA"`
+    # quiere decir eso: la cifra es la del informe aprobado, no una lectura
+    # propia del Boletín Oficial.
+    # Suelo de uso industrial (mg/kg).
+    _g("cianuro", "industrial", 500, norma=LEY_24585_SUELO_IND, estado="según IIA"),
+    _g("cobre", "industrial", 500, norma=LEY_24585_SUELO_IND, estado="según IIA"),
+    _g("mercurio", "industrial", 20, norma=LEY_24585_SUELO_IND, estado="según IIA"),
+    _g("molibdeno", "industrial", 40, norma=LEY_24585_SUELO_IND, estado="según IIA"),
+    _g("plata", "industrial", 40, norma=LEY_24585_SUELO_IND, estado="según IIA"),
+    _g("plomo", "industrial", 1000, norma=LEY_24585_SUELO_IND, estado="según IIA"),
+    _g("selenio", "industrial", 10, norma=LEY_24585_SUELO_IND, estado="según IIA"),
+
+    # Calidad de aire ambiente (µg/m³), con el tiempo de promedio en la norma.
+    _g("pm10", "aire_ambiente", 150, norma=f"{LEY_24585_T8}, fracción respirable, 24 h",
+       estado="según IIA"),
+    _g("co", "aire_ambiente", 40_000, norma=f"{LEY_24585_T8}, 1 h", estado="según IIA",
+       nota="La tabla impresa dice 40 µg/m³; el propio informe aclara que la unidad "
+            "correcta es mg/m³ (40 mg/m³)."),
+    _g("so2", "aire_ambiente", 400, norma=f"{LEY_24585_T8}, 24 h", estado="según IIA"),
+    _g("no2", "aire_ambiente", 400, norma=f"{LEY_24585_T8}, óxidos de nitrógeno, 1 h",
+       estado="según IIA"),
+    _g("plomo", "aire_ambiente", 1.5, norma=f"{LEY_24585_T8}, 3 meses", estado="según IIA"),
+    _g("ozono", "aire_ambiente", 235, norma=f"{LEY_24585_T8}, oxidantes fotoquímicos, 1 h",
+       estado="según IIA"),
+    _g("h2s", "aire_ambiente", 8, norma=f"{LEY_24585_T8}, 30 min", estado="según IIA"),
+
+    # Agua: tablas 2 (vida acuática) y 6 (bebida de ganado), con los valores que
+    # el informe transcribe. El zinc para ganado no se carga: el informe lo
+    # imprime con dos unidades distintas.
+    _g("ph", "vida_acuatica", 9.0, 6.5, LEY_24585_T2, estado="según IIA"),
+    _g("mercurio", "vida_acuatica", 0.0001, norma=LEY_24585_T2, estado="según IIA"),
+    _g("uranio", "vida_acuatica", 0.02, norma=LEY_24585_T2, estado="según IIA"),
+    _g("vanadio", "vida_acuatica", 0.1, norma=LEY_24585_T2, estado="según IIA"),
+    _g("niquel", "vida_acuatica", 0.025, norma=LEY_24585_T2, estado="según IIA"),
+    _g("ph", "bebida_ganado", 8.5, 6.5, LEY_24585_T6, estado="según IIA"),
+    _g("aluminio", "bebida_ganado", 5, norma=LEY_24585_T6, estado="según IIA"),
+    _g("berilio", "bebida_ganado", 0.1, norma=LEY_24585_T6, estado="según IIA"),
+    _g("cadmio", "bebida_ganado", 0.02, norma=LEY_24585_T6, estado="según IIA"),
+    _g("cobalto", "bebida_ganado", 1, norma=LEY_24585_T6, estado="según IIA"),
+    _g("cobre", "bebida_ganado", 1, norma=LEY_24585_T6, estado="según IIA"),
+    _g("cromo", "bebida_ganado", 1, norma=LEY_24585_T6, estado="según IIA"),
+    _g("fluoruros", "bebida_ganado", 1, norma=LEY_24585_T6, estado="según IIA"),
+    _g("mercurio", "bebida_ganado", 0.002, norma=LEY_24585_T6, estado="según IIA"),
+    _g("molibdeno", "bebida_ganado", 0.5, norma=LEY_24585_T6, estado="según IIA"),
+    _g("niquel", "bebida_ganado", 1, norma=LEY_24585_T6, estado="según IIA"),
+    _g("plomo", "bebida_ganado", 0.1, norma=LEY_24585_T6, estado="según IIA"),
+    _g("selenio", "bebida_ganado", 0.05, norma=LEY_24585_T6, estado="según IIA"),
+    _g("uranio", "bebida_ganado", 0.2, norma=LEY_24585_T6, estado="según IIA"),
+    _g("vanadio", "bebida_ganado", 0.1, norma=LEY_24585_T6, estado="según IIA"),
+
+    # Ruido: el informe compara con la guía del Banco Mundial para áreas
+    # industriales y comerciales.
+    _g("nivel_sonoro", "ruido_industrial", 70, norma=f"{IFC_RUIDO}, área industrial, diurno",
+       estado="según IIA"),
 ]
 
 
