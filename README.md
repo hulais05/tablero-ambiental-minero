@@ -38,7 +38,8 @@ Oficial.
 ## Cómo correrlo
 
 ```bash
-cd tablero-ambiental
+git clone https://github.com/hulais05/tablero-ambiental-minero.git
+cd tablero-ambiental-minero
 pip install -r requirements.txt
 streamlit run app.py
 ```

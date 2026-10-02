@@ -40,7 +40,7 @@ BG, CARD, BORDE, TXT, MUT, ACENTO = (
 # El lema vive en una constante: aparece en la barra lateral, el encabezado y
 # el pie, y tiene que cambiar en un solo lugar.
 LEMA = "Del laboratorio al dato público."
-REPO = "https://github.com/hulais05/recuperasalud/tree/claude/upbeat-feynman-s9svcg/tablero-ambiental"
+REPO = "https://github.com/hulais05/tablero-ambiental-minero/blob/main"
 
 st.markdown(f"""
 <style>
