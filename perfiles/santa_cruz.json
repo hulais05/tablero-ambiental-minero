@@ -1,0 +1,22 @@
+{
+  "id": "santa_cruz",
+  "orden": 4,
+  "jurisdiccion": "Santa Cruz",
+  "autoridad": "Secretaría de Estado de Minería de Santa Cruz",
+  "canales": [
+    {
+      "id": "cyma",
+      "nombre": "CyMA · Sistema de Control y Monitoreo Ambiental remoto",
+      "tipo": "plataforma_web",
+      "estado": "vigente",
+      "url": null,
+      "descripcion": "Cada empresa carga sus monitoreos de aire, agua y suelo al momento de obtenerlos; la Secretaría los audita con tableros y reportes, y el sistema avisa los vencimientos de entrega. Lo desarrollaron MiningIDEAS y la Universidad Nacional de San Luis (en uso desde 2023).",
+      "entregables": ["planilla_xlsx"],
+      "a_confirmar": "No se encontró API pública ni plantilla de carga.",
+      "fuentes": [
+        {"titulo": "Capacitan en digitalización de monitoreo ambiental minero", "url": "https://noticias.santacruz.gob.ar/organismos/energia/capacitan-en-digitalizacion-de-monitoreo-ambiental-minero"},
+        {"titulo": "Desarrollo de plataforma de monitoreo ambiental para empresas mineras (MiningIDEAS)", "url": "https://miningideas.com/blog/caso5.html"}
+      ]
+    }
+  ]
+}

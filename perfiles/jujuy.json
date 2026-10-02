@@ -1,0 +1,63 @@
+{
+  "id": "jujuy",
+  "orden": 1,
+  "jurisdiccion": "Jujuy",
+  "autoridad": "Ministerio de Minería de la Provincia de Jujuy",
+  "nota": "La ex Secretaría de Minería e Hidrocarburos tiene rango de Ministerio desde fines de 2025, con la misma estructura operativa.",
+  "canales": [
+    {
+      "id": "tad-imap",
+      "nombre": "TAD Jujuy · Informe de Monitoreo Ambiental Participativo (IMAP)",
+      "tipo": "expediente",
+      "estado": "vigente",
+      "url": null,
+      "descripcion": "Desde el 1/9/2026 el IMAP se presenta solo por Trámites a Distancia, integrado a GDE (expediente electrónico con firma digital y trazabilidad). Se pide el informe, los resultados por parámetro y componente en planillas Excel y los puntos de monitoreo en Shape y KMZ.",
+      "entregables": ["paquete_tad", "informe_html", "planilla_xlsx", "kmz", "shp"],
+      "anexos": [
+        {"documento": "Nota de presentación", "genera_el_sistema": true},
+        {"documento": "Resumen ejecutivo y resultados del monitoreo", "genera_el_sistema": true},
+        {"documento": "Resultados por parámetro y componente (Excel)", "genera_el_sistema": true},
+        {"documento": "Puntos de monitoreo en Shape y KMZ", "genera_el_sistema": true},
+        {"documento": "Firmas del responsable de la empresa y de la consultora", "genera_el_sistema": false},
+        {"documento": "Certificado del Registro de Consultores Ambientales (art. 32, Dec. 7751-DEyP-2023)", "genera_el_sistema": false},
+        {"documento": "Cronograma actualizado (art. 98)", "genera_el_sistema": false},
+        {"documento": "Metodología y procedimientos de muestreo", "genera_el_sistema": false},
+        {"documento": "Constancias de invitación: municipio, superficiarios, Ambiente, Recursos Hídricos, Pueblos Indígenas y Dirección de Minería", "genera_el_sistema": false},
+        {"documento": "Planillas de campo firmadas y fechadas", "genera_el_sistema": false},
+        {"documento": "Cadena de custodia de agua, suelo y aire", "genera_el_sistema": false},
+        {"documento": "Protocolos de laboratorio y certificados de calibración vigentes", "genera_el_sistema": false}
+      ],
+      "a_confirmar": "La obligatoriedad desde el 1/9/2026 (Res. Ministerial 22-M-2026) se relevó de una sola fuente. Confirmar el nombre exacto del trámite en TAD.",
+      "fuentes": [
+        {"titulo": "Requisitos de presentación del IMAP", "url": "https://mineriajujuy.gob.ar/site/requisitos-imap.php"},
+        {"titulo": "Jujuy presentó oficialmente Trámites a Distancia para empresas mineras (31/8/2026)", "url": "https://www.jujuyaldia.com.ar/2026/08/31/jujuy-presento-oficialmente-tramites-a-distancia-para-empresas-mineras/"}
+      ]
+    },
+    {
+      "id": "maim",
+      "nombre": "MAIM Jujuy · Monitoreos Ambientales de la Industria Minera",
+      "tipo": "plataforma_web",
+      "estado": "vigente",
+      "url": "https://maim.mineriajujuy.gob.ar/",
+      "descripcion": "Plataforma pública: las empresas cargan su línea de base y sus monitoreos, el Ministerio los sistematiza y controla, y la ciudadanía consulta históricos y mapas. Cubre agua, aire, suelo, costra salina, flora y fauna.",
+      "entregables": ["planilla_xlsx", "kmz", "geojson"],
+      "a_confirmar": "No se encontró una plantilla de carga ni una API publicadas. La planilla se ajusta a la plantilla oficial cuando el Ministerio la comparta.",
+      "fuentes": [
+        {"titulo": "MAIM Jujuy", "url": "https://maim.mineriajujuy.gob.ar/"},
+        {"titulo": "Monitoreo ambiental en empresas para garantizar una minería sustentable (2022)", "url": "https://huellaminera.com/2022/03/jujuy-monitoreo-ambiental-en-empresas-para-garantizar-una-mineria-sustentable/"}
+      ]
+    },
+    {
+      "id": "idejuy",
+      "nombre": "IDEJuy · Infraestructura de Datos Espaciales de Jujuy",
+      "tipo": "geoservicio",
+      "estado": "lectura",
+      "url": "https://geo.idejuy.jujuy.gob.ar/geoserver/wms",
+      "descripcion": "GeoServer con servicios WMS, WFS, WCS y CSW. Sirve para tomar capas oficiales (límites, cuencas, catastro) como base del mapa. No recibe datos.",
+      "entregables": [],
+      "fuentes": [
+        {"titulo": "IDEJuy · Geoservicios", "url": "https://moderno.jujuy.gob.ar/idejuy-geoservicios/"}
+      ]
+    }
+  ]
+}

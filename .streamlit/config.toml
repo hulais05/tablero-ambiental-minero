@@ -1,0 +1,14 @@
+# Tema claro fijo. Sin esto, los controles propios de Streamlit siguen el tema
+# del sistema operativo y quedan oscuros aunque el CSS de la app pinte el fondo
+# de blanco. Streamlit lee este archivo desde el directorio donde se ejecuta el
+# comando: lanzar la app parada en tablero-ambiental/.
+
+[theme]
+base = "light"
+primaryColor = "#155E75"
+backgroundColor = "#F6F8FB"
+secondaryBackgroundColor = "#FFFFFF"
+textColor = "#0F172A"
+
+[server]
+headless = true

@@ -1,0 +1,50 @@
+{
+  "id": "salta",
+  "orden": 2,
+  "jurisdiccion": "Salta",
+  "autoridad": "Secretaría de Minería y Energía de la Provincia de Salta",
+  "nota": "Salta no tiene hoy un equivalente al MAIM, pero lo está financiando: el préstamo del Banco Mundial P510696 incluye un sistema integrado de control y monitoreo ambiental y una plataforma de interoperabilidad.",
+  "canales": [
+    {
+      "id": "simsa",
+      "nombre": "SIMSa · Sistema de Información Minera de Salta",
+      "tipo": "plataforma_web",
+      "estado": "vigente",
+      "url": "https://simsa.salta.gob.ar/simsa-web/",
+      "descripcion": "Desarrollado con el Banco Mundial y alineado a EITI. Módulos de Impacto y Producción, Canon, Regalías y Administración. No se encontró un módulo de monitoreo ambiental.",
+      "entregables": ["planilla_xlsx"],
+      "a_confirmar": "La URL se relevó de una sola fuente.",
+      "fuentes": [
+        {"titulo": "SIMSA: impulsando la transparencia y desarrollo en la minería salteña", "url": "https://www.salta.gob.ar/prensa/noticias/simsa-impulsando-la-transparencia-y-desarrollo-en-la-mineria-saltenia-93275"},
+        {"titulo": "Comenzó la capacitación para cargar datos socioeconómicos en SIMSa", "url": "https://produccionsalta.gob.ar/sistema-de-informacion-minera-de-salta-comenzo-la-capacitacion-para-cargar-datos-socioeconomicos-del-sector-minero/"}
+      ]
+    },
+    {
+      "id": "salta-control-ambiental",
+      "nombre": "Sistema integrado de control y monitoreo ambiental + plataforma de interoperabilidad (BIRF P510696)",
+      "tipo": "api",
+      "estado": "en desarrollo",
+      "url": null,
+      "descripcion": "Préstamo de USD 100 millones aprobado por el Banco Mundial el 6/7/2026 y autorizado por el Senado salteño el 17/9/2026. Su componente minero financia nuevos módulos de SIMSa, un sistema integrado de control y monitoreo ambiental y una plataforma de interoperabilidad con otros organismos y el Juzgado de Minas. Las especificaciones técnicas no están publicadas.",
+      "api": {"url": null, "token_env": "SALTA_MONITOREO_TOKEN", "formato": "sensorthings"},
+      "entregables": ["sensorthings", "geojson"],
+      "a_confirmar": "Conviene seguir las licitaciones del proyecto: ahí se van a definir los formatos de intercambio.",
+      "fuentes": [
+        {"titulo": "Documento de evaluación del proyecto (Banco Mundial)", "url": "https://documents1.worldbank.org/curated/en/099061526175533352/pdf/BOSIB-12f87885-6324-4329-a46f-c19fc2d51058.pdf"},
+        {"titulo": "La provincia ya puede tomar deuda por 250 millones de dólares (18/9/2026)", "url": "https://www.eltribuno.com/salta/2026-9-18-0-0-0-la-provincia-ya-puede-tomar-deuda-por-250-millones-de-dolares"}
+      ]
+    },
+    {
+      "id": "idesa",
+      "nombre": "IDESa · Infraestructura de Datos Espaciales de Salta",
+      "tipo": "geoservicio",
+      "estado": "lectura",
+      "url": "https://geoportal.idesa.gob.ar/geoserver/wfs",
+      "descripcion": "GeoServer con WFS 2.0.0 y WMS. Capas oficiales para el mapa base. No recibe datos.",
+      "entregables": [],
+      "fuentes": [
+        {"titulo": "IDESa en el directorio Spatineo", "url": "https://directory.spatineo.com/service/47641/"}
+      ]
+    }
+  ]
+}

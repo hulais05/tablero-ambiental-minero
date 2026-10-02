@@ -1,0 +1,30 @@
+{
+  "id": "nacion",
+  "orden": 5,
+  "jurisdiccion": "Nación y estándares abiertos",
+  "autoridad": "Portales nacionales de datos abiertos",
+  "canales": [
+    {
+      "id": "datos-abiertos",
+      "nombre": "Datos abiertos (datos.gob.ar · datos.ambiente.gob.ar)",
+      "tipo": "datos_abiertos",
+      "estado": "lectura",
+      "url": "https://datos.gob.ar/",
+      "descripcion": "Los portales nacionales corren sobre CKAN (Andino). El paquete Frictionless (datapackage.json + CSV) se publica en cualquier portal CKAN, nacional, provincial o propio de la empresa.",
+      "entregables": ["datos_abiertos"],
+      "fuentes": [
+        {"titulo": "Portal Andino · CKAN", "url": "https://portal-andino.datos.gob.ar/acerca/ckan"}
+      ]
+    },
+    {
+      "id": "sensorthings",
+      "nombre": "OGC SensorThings API",
+      "tipo": "estandar",
+      "estado": "estándar abierto",
+      "url": "https://www.ogc.org/standards/sensorthings/",
+      "descripcion": "Estándar abierto para observaciones ambientales: puntos, parámetros, unidades y resultados. No se encontró un organismo argentino que lo use todavía; el sistema guarda sus datos con esa forma para que cualquier plataforma que lo adopte se conecte sin traducciones.",
+      "entregables": ["sensorthings", "geojson"],
+      "fuentes": []
+    }
+  ]
+}

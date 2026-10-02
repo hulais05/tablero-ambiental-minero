@@ -1,0 +1,21 @@
+{
+  "id": "catamarca",
+  "orden": 3,
+  "jurisdiccion": "Catamarca",
+  "autoridad": "Autoridad minera de la Provincia de Catamarca",
+  "canales": [
+    {
+      "id": "tad-catamarca",
+      "nombre": "TAD/GDE Catamarca · Informes de monitoreo ambiental",
+      "tipo": "expediente",
+      "estado": "vigente",
+      "url": null,
+      "descripcion": "La Resolución Conjunta 1/2026 (Boletín Oficial del 21/8/2026) dispone que los informes de monitoreo ambiental se presenten solo por TAD/GDE desde el 1/9/2026. Hay además un anteproyecto de ley de Portal Digital de Transparencia Minera.",
+      "entregables": ["paquete_tad", "informe_html", "planilla_xlsx", "kmz", "shp"],
+      "a_confirmar": "Relevado de una sola fuente. Confirmar los requisitos del trámite.",
+      "fuentes": [
+        {"titulo": "Mining News agosto 2026", "url": "https://abogados.com.ar/mining-news-agosto-2026/40055"}
+      ]
+    }
+  ]
+}
